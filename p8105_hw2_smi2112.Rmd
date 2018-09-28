@@ -30,23 +30,65 @@ Number of distinct stations: 465
 count(distinct(transit_data, line, station_name))
 ```
 
-Number of ADA compliant stations: 465
+Number of ADA compliant stations: 84
 
 ```{r}
-distinct(transit_data, line, station_name) %>% 
-  count(., ada = TRUE)
+transit_data %>%
+  select(line, station_name, ada) %>% 
+  group_by(line, station_name) %>% 
+  filter(ada == TRUE) %>% 
+  n_distinct()
+
 ```
 
 Proportion of station entrances/exits without vending allowed entrace: 0.0980
 
 ```{r}
-prop.table(table(transit_data$vending))
+38.7
+
+prop.table(table(transit_data$vending))*100
 ```
 
 Reformat data:
 
 ```{r}
+transit_data_tidy = gather(transit_data, key = route_number, value = route_name, route1:route11) %>% 
+  mutate(route_number = recode(route_number, 
+                               "route1" = 1, 
+                               "route2" = 2, 
+                               "route3" = 3,
+                               "route4" = 4, 
+                               "route5" = 5, 
+                               "route6" = 6, 
+                               "route7" = 7, 
+                               "route8" = 8, 
+                               "route9" = 9, 
+                               "route10" = 10, 
+                               "route11" = 11)) 
 
+is.numeric(transit_data_tidy$route_number)
+is.character(transit_data_tidy$route_name)
 ```
+
+Number of distinct stations serving the A train: 60
+
+```{r}
+transit_data_tidy %>%
+  select(line, station_name, route_name) %>% 
+  filter(route_name == "A") %>% 
+  n_distinct()
+```
+
+Number of distinct stations serving the A train that are ADA compliant: 17
+
+```{r}
+transit_data_tidy %>%
+  select(line, station_name, route_name, ada) %>% 
+  filter(route_name == "A" & ada == TRUE) %>% 
+  n_distinct()
+```
+
+
+
 
 

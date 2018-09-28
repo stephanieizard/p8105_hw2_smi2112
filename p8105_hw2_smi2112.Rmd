@@ -27,7 +27,9 @@ Short paragraph:
 Number of distinct stations: 465
 
 ```{r}
-count(distinct(transit_data, line, station_name))
+transit_data %>% 
+  select(line, station_name) %>% 
+  n_distinct()
 ```
 
 Number of ADA compliant stations: 84

@@ -37,8 +37,16 @@ distinct(transit_data, line, station_name) %>%
   count(., ada = TRUE)
 ```
 
-Proportion of station entrances/exists without vending allowed entrace:
-``
+Proportion of station entrances/exits without vending allowed entrace: 0.0980
 
+```{r}
+prop.table(table(transit_data$vending))
+```
+
+Reformat data:
+
+```{r}
+
+```
 
 

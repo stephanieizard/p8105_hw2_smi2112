@@ -1,0 +1,25 @@
+---
+title: "p8105_hw2_smi2112"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Problem 1
+
+Read and clean the data:
+
+```{r}
+library(tidyverse)
+library(dplyr)
+transit_data = read_csv(file = "./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv") %>% 
+  janitor::clean_names() %>%
+  select(line, station_name, station_latitude, station_longitude, route1:route11, entry, vending, entrance_type, ada) %>% 
+  mutate(entry = if_else(entry == "YES", TRUE, FALSE))
+```
+
+Short paragraph:
+
+

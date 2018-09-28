@@ -22,4 +22,23 @@ transit_data = read_csv(file = "./data/NYC_Transit_Subway_Entrance_And_Exit_Data
 
 Short paragraph:
 
+... these data are not tidy yet ...........
+
+Number of distinct stations: 465
+
+```{r}
+count(distinct(transit_data, line, station_name))
+```
+
+Number of ADA compliant stations: 465
+
+```{r}
+distinct(transit_data, line, station_name) %>% 
+  count(., ada = TRUE)
+```
+
+Proportion of station entrances/exists without vending allowed entrace:
+``
+
+
 

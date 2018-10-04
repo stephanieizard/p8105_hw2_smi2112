@@ -13,7 +13,6 @@ Read and clean the data:
 
 ```{r}
 library(tidyverse)
-library(dplyr)
 transit_data = read_csv(file = "./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv") %>% 
   janitor::clean_names() %>%
   select(line, station_name, station_latitude, station_longitude, route1:route11, entry, vending, entrance_type, ada) %>% 
@@ -40,7 +39,6 @@ transit_data %>%
   group_by(line, station_name) %>% 
   filter(ada == TRUE) %>% 
   n_distinct()
-
 ```
 
 Proportion of station entrances/exits without vending allowed entrace: 0.0980
@@ -90,6 +88,67 @@ transit_data_tidy %>%
   n_distinct()
 ```
 
+##Problem 2
+
+Reading and cleaning the Mr. Trash Wheel sheet:
+
+```{r}
+library(readxl)
+
+mr_trash = read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", "Mr. Trash Wheel", range = cell_cols("A:M")) %>%
+  janitor::clean_names() %>% 
+  filter(., !is.na(dumpster))
+
+round(mr_trash$sports_balls) %>% 
+  as.integer(mr_trash$sports_balls)
+
+```
+
+
+Reading and cleaning the precipitation data for 2016 and 2017:
+
+```{r}
+precip_2016 = read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", "2016 Precipitation", range = cell_rows(2:14)) %>% 
+  janitor::clean_names() %>% 
+  mutate(year = 2016)
+
+precip_2017 = read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", "2017 Precipitation", range = cell_rows(2:14)) %>% 
+  janitor::clean_names() %>% 
+  mutate(year = 2017)
+
+month_info = tibble(
+  month = 1:12, 
+  month_name = month.name)
+
+precip = union(precip_2016, precip_2017, by = "month") %>% 
+  inner_join(., month_info, by = "month") %>% 
+  select(-"month")
+```
+
+Paragraph about these data:
+
+There are `{r} nrow(mr_trash)` observations in the Mr. Trash Wheel dataset. There are `{r} nrow(precip)` observations in the precipitation dataset. 
+Some key variables of interest are as follows: 
+
+Key variables:
+
+There was `{r} precip %>% select(total, year) %>% filter(year == 2017) %>% summarise(sum(total))` inches of precipitation in 2017. The median number of sports balls in a dumpster in 2016 was `{r} mr_trash %>% select(year, sports_balls) %>% filter(year == 2016) %>% summarise(median(sports_balls))`.
+
+##Problem 3
+
+Loading BRFSS data from p8105.datasets package:
+
+```{r cache = TRUE}
+devtools::install_github("p8105/p8105.datasets")
+library(p8105.datasets)
+data("brfss_smart2010")
+```
+
+Formatting the data:
+
+```{r}
+
+```
 
 
 

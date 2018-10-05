@@ -144,14 +144,16 @@ Formatting the data:
 ```{r}
 brfss = brfss_smart2010 %>% 
   janitor::clean_names() %>% 
-  filter(topic == "Overall Health") %>% 
   rename(state = locationabbr, county = locationdesc) %>% 
+  filter(topic == "Overall Health") %>% 
   select(response, everything()) %>% 
   select(-class, -topic, -question, -sample_size, -c(confidence_limit_low:geo_location)) %>% 
   spread(key = response, value = data_value) %>% 
   janitor::clean_names() %>% 
   mutate(excellent_verygood = excellent + very_good)
 ```
+
+Answering questions:
 
 There are `r brfss %>% select(state, county) %>% n_distinct()` unique locations. 
 
@@ -165,7 +167,7 @@ brfss %>%
   arrange(desc(n))
 ```
 
-New Jersey has the most observations.
+NJ is represented the most.
 
 In 2002, the median of the "Excellent" response value was `r brfss %>% select(year, excellent) %>% filter(year == 2002) %>% summarise(median(excellent, na.rm = TRUE))`.
 

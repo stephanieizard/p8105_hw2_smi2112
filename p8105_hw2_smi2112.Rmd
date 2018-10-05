@@ -147,8 +147,55 @@ data("brfss_smart2010")
 Formatting the data:
 
 ```{r}
-
+brfss = brfss_smart2010 %>% 
+  janitor::clean_names() %>% 
+  filter(topic == "Overall Health") %>% 
+  rename(state = locationabbr, county = locationdesc) %>% 
+  select(response, everything()) %>% 
+  select(-class, -topic, -question, -sample_size, -c(confidence_limit_low:geo_location)) %>% 
+  spread(key = response, value = data_value) %>% 
+  janitor::clean_names() %>% 
+  mutate(excellent_verygood = excellent + very_good)
 ```
+
+There are `{r} brfss %>% select(state, county) %>% n_distinct()` unique locations. 
+
+There are `{r} brfss %>% select(state) %>% n_distinct()` states. Every state is represented, with Washington DC represented as well.
+
+```{r}
+brfss %>% 
+  select(state) %>% 
+  group_by(state) %>% 
+  count(state) %>% 
+  arrange(desc(n))
+```
+
+New Jersey has the most observations.
+
+In 2002, the median of the "Excellent" response value was `{r} brfss %>% select(year, excellent) %>% filter(year == 2002) %>% summarise(median(excellent, na.rm = TRUE))`.
+
+Histogram of "Excellent" response values in the year 2002:
+
+```{r}
+brfss %>% 
+  filter(year == 2002) %>% 
+  ggplot(., aes(x = excellent)) + geom_histogram()
+```
+
+Scatterplot of proportion of "Excellent" response values in New York County and Queens county in each year from 2002 to 2010:
+
+```{r}
+brfss %>% 
+  filter(county == "NY - New York County" | county == "NY - Queens County") %>% 
+  ggplot(., aes(x = year, y = excellent, color = county)) + geom_point()
+```
+
+
+
+
+
+
+
 
 
 

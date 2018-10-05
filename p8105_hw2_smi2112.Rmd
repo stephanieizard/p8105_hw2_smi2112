@@ -13,17 +13,18 @@ Read and clean the data:
 
 ```{r}
 library(tidyverse)
+
 transit_data = read_csv(file = "./data/NYC_Transit_Subway_Entrance_And_Exit_Data.csv") %>% 
   janitor::clean_names() %>%
   select(line, station_name, station_latitude, station_longitude, route1:route11, entry, vending, entrance_type, ada) %>% 
   mutate(entry = if_else(entry == "YES", TRUE, FALSE))
 ```
 
-Short paragraph:
+Short paragraph about this dataset:
 
-... these data are not tidy yet ...........
+The dataset contains the variables line, station name, station latitude and longitude, routes 1 through 11, entry availability, vending availability, entrance type, and ada compliance. I have used the janitor package to clean the names of the variables to make them lowercase and without spaces, and I have changed the data type of the entry variable from character to logical. The dataset dimensions are `r dim(transit_data)` (1868 rows, 19 columns). These data are not tidy yet, because every column is not a variable; to make the dataset tidy routes 1-11 would be observations.
 
-Number of distinct stations: 465
+Answering questions:
 
 ```{r}
 transit_data %>% 
@@ -31,25 +32,29 @@ transit_data %>%
   n_distinct()
 ```
 
-Number of ADA compliant stations: 84
+There are 465 distinct stations.
 
 ```{r}
 transit_data %>%
   select(line, station_name, ada) %>% 
+  filter(ada == TRUE) %>%
   group_by(line, station_name) %>% 
-  filter(ada == TRUE) %>% 
   n_distinct()
 ```
 
-Proportion of station entrances/exits without vending allowed entrace: 0.0980
+There are 84 ADA compliant stations.
 
 ```{r}
-38.7
-
-prop.table(table(transit_data$vending))*100
+transit_data %>% 
+  select(line, station_name, vending, entry) %>% 
+  filter(vending == "NO") %>% 
+  distinct() %>% 
+  summarise(mean(entry))
 ```
 
-Reformat data:
+The proportion of station entrances/exits without vending that allow entrace is 0.387.
+
+Reformatting data so route number and route name are distinct variables:
 
 ```{r}
 transit_data_tidy = gather(transit_data, key = route_number, value = route_name, route1:route11) %>% 
@@ -65,12 +70,9 @@ transit_data_tidy = gather(transit_data, key = route_number, value = route_name,
                                "route9" = 9, 
                                "route10" = 10, 
                                "route11" = 11)) 
-
-is.numeric(transit_data_tidy$route_number)
-is.character(transit_data_tidy$route_name)
 ```
 
-Number of distinct stations serving the A train: 60
+Answering questions:
 
 ```{r}
 transit_data_tidy %>%
@@ -79,7 +81,7 @@ transit_data_tidy %>%
   n_distinct()
 ```
 
-Number of distinct stations serving the A train that are ADA compliant: 17
+There are 60 distinct stations that serve the A train.
 
 ```{r}
 transit_data_tidy %>%
@@ -88,6 +90,8 @@ transit_data_tidy %>%
   n_distinct()
 ```
 
+There are 17 distinct stations serving the A train that are ADA compliant.
+
 ##Problem 2
 
 Reading and cleaning the Mr. Trash Wheel sheet:
@@ -95,15 +99,11 @@ Reading and cleaning the Mr. Trash Wheel sheet:
 ```{r}
 library(readxl)
 
-mr_trash = read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", "Mr. Trash Wheel", range = cell_cols("A:M")) %>%
+mr_trash = read_excel("./data/HealthyHarborWaterWheelTotals2018-7-28.xlsx", "Mr. Trash Wheel", range = cell_cols("A:N")) %>%
   janitor::clean_names() %>% 
-  filter(., !is.na(dumpster))
-
-round(mr_trash$sports_balls) %>% 
-  as.integer(mr_trash$sports_balls)
-
+  filter(., !is.na(dumpster)) %>% 
+  mutate(sports_balls = as.integer(round(sports_balls)))
 ```
-
 
 Reading and cleaning the precipitation data for 2016 and 2017:
 
@@ -127,12 +127,7 @@ precip = union(precip_2016, precip_2017, by = "month") %>%
 
 Paragraph about these data:
 
-There are `r nrow(mr_trash)` observations in the Mr. Trash Wheel dataset. There are `r nrow(precip)` observations in the precipitation dataset. 
-Some key variables of interest are as follows: 
-
-Key variables:
-
-There was `r precip %>% select(total, year) %>% filter(year == 2017) %>% summarise(sum(total))` inches of precipitation in 2017. The median number of sports balls in a dumpster in 2016 was `r mr_trash %>% select(year, sports_balls) %>% filter(year == 2016) %>% summarise(median(sports_balls))`.
+There are `r nrow(mr_trash)` observations in the Mr. Trash Wheel dataset. There are `r nrow(precip)` observations in the precipitation dataset. Some key variables of interest are as follows: There was `r mr_trash %>% select(year, volume_cubic_yards) %>% filter(year == 2017) %>% summarise(mean(volume_cubic_yards))` cubic yards of trash in 2017, and `r mr_trash %>% select(year, weight_tons) %>% filter(year == 2017) %>% summarise(mean(weight_tons))` tons of trash in 2017. There was `r precip %>% select(total, year) %>% filter(year == 2017) %>% summarise(sum(total))` inches of precipitation in 2017. The median number of sports balls in a dumpster in 2016 was `r mr_trash %>% select(year, sports_balls) %>% filter(year == 2016) %>% summarise(median(sports_balls))`.
 
 ##Problem 3
 
